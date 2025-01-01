@@ -4,13 +4,15 @@ import { Server as socketio } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
 const SERVER_NAME = process.env.SERVER_NAME || 'APP';
-
+import dotenv from 'dotenv';
+import ServeChat from './routes/serveChats.js';
 const app = express();
+dotenv.config();
 
 
-const uri= 'mongodb+srv://sahilchopra9696:Hwjtp6VpV2LxknKX@cluster0.r2ql7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+
 const httpServer = http.createServer(app);
-mongoose.connect(uri)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB connection error:", err));
 
@@ -22,6 +24,8 @@ const io = new socketio(httpServer, {
 });
 
 app.use(cors());
+app.use(express.json());
+
 
 io.on('connection', (socket) => {
   console.log('New user connected');
@@ -35,6 +39,8 @@ io.on('connection', (socket) => {
     console.log('User disconnected');
   });
 });
+
+app.use('/chat', ServeChat)
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Chat App!');
